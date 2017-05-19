@@ -44,7 +44,7 @@ import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
-import retrofit2.Converter;
+import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -159,6 +159,7 @@ public class RestClient<T> {
             Log.e(LOG_TAG, "## RestClient() setSslSocketFactory failed" + e.getMessage());
         }
 
+        addLoggingInterceptor(okHttpClientBuilder);
         mOkHttpClient = okHttpClientBuilder.build();
 
         // remove any trailing http in the uri prefix
@@ -179,10 +180,13 @@ public class RestClient<T> {
 
         Retrofit retrofit = builder.build();
 
-        // debug only
-        //retrofit.setLogLevel(RestAdapter.LogLevel.FULL);
-
         mApi = retrofit.create(type);
+    }
+
+    private void addLoggingInterceptor(OkHttpClient.Builder okHttpClientBuilder) {
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        okHttpClientBuilder.addInterceptor(interceptor);
     }
 
     /**
